@@ -11,6 +11,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.screen.SetupScreen
 import com.irajnajafi1988gmail.waterreminder.ui.theme.WaterReminderTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -22,8 +23,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WaterReminderTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
+                    SetupScreen(
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -32,18 +32,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    WaterReminderTheme {
-        Greeting("Android")
-    }
-}
