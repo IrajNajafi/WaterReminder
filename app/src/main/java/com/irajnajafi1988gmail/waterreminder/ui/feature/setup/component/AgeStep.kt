@@ -93,7 +93,7 @@ fun AgeStep(
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
-                    text = "Kg",
+                    text = "Year",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray
