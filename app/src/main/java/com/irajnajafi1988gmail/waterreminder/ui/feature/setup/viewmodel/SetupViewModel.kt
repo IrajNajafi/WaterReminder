@@ -5,94 +5,90 @@ import androidx.lifecycle.viewModelScope
 import com.irajnajafi1988gmail.waterreminder.R
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.*
 import com.irajnajafi1988gmail.waterreminder.ui.theme.SkyBlue
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SetupViewModel : ViewModel() {
+@HiltViewModel
+class SetupViewModel @Inject constructor() : ViewModel() {
 
-    // وضعیت کاربر
+    // --- User Profile ---
     private val _userProfile = MutableStateFlow(UserProfile())
-    val userProfile: StateFlow<UserProfile> = _userProfile
+    val userProfile = _userProfile.asStateFlow()
 
-    // مرحله فعلی
+    // --- Current Step ---
     private val _currentStep = MutableStateFlow(0)
-    val currentStep: StateFlow<Int> = _currentStep
+    val currentStep = _currentStep.asStateFlow()
 
-    // تولید لیست مراحل برای UI
-    val stepStatuses: StateFlow<List<StepStatus>> = MutableStateFlow(emptyList())
-
-    init {
-        updateSteps()
-    }
-
-    private fun updateSteps() {
-        viewModelScope.launch {
-            val profile = _userProfile.value
-            val stepList = listOf(
+    // --- Step Statuses ---
+    val stepStatuses: StateFlow<List<StepStatus>> =
+        combine(_userProfile, _currentStep) { profile, step ->
+            listOf(
                 StepStatus(
-                    icon = if (profile.gender == Gender.MALE) R.drawable.male else R.drawable.female,
-                    label = profile.gender?.name ?: "",
-                    color = SkyBlue,
-                    isActive = _currentStep.value >= 0
+                    icon = when(profile.gender) {
+                        Gender.MALE -> R.drawable.male
+                        Gender.FEMALE -> R.drawable.female
+                        else -> R.drawable.venus_mars_icon
+                    },
+                    label = profile.gender?.name ?: "Gender",
+                    isActive = profile.gender != null,
+                    color = SkyBlue
                 ),
                 StepStatus(
                     icon = R.drawable.weight,
-                    label = "${profile.weight} Kg",
+                    label = profile.weight?.let { "$it Kg" } ?: "Weight",
                     color = SkyBlue,
-                    isActive = _currentStep.value >= 1
+                    isActive = profile.weight != null
                 ),
                 StepStatus(
                     icon = R.drawable.age,
-                    label = "${profile.age} Yr",
+                    label = profile.age?.let { "$it Yr" } ?: "Age",
                     color = SkyBlue,
-                    isActive = _currentStep.value >= 2
+                    isActive = profile.age != null
                 ),
                 StepStatus(
                     icon = R.drawable.activity,
-                    label = profile.activity?.name ?: "",
+                    label = profile.activity?.name ?: "Activity",
                     color = SkyBlue,
-                    isActive = _currentStep.value >= 3
+                    isActive = profile.activity != null
                 ),
                 StepStatus(
                     icon = R.drawable.environment,
-                    label = profile.environment?.name ?: "",
+                    label = profile.environment?.name ?: "Environment",
                     color = SkyBlue,
-                    isActive = _currentStep.value >= 4
+                    isActive = profile.environment != null
                 )
             )
-            (stepStatuses as MutableStateFlow).value = stepList
-        }
-    }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // توابع تغییر وضعیت کاربر
-    fun setGender(gender: Gender) {
-        _userProfile.value = _userProfile.value.copy(gender = gender)
-        updateSteps()
-    }
 
-    fun setWeight(weight: Int) {
-        _userProfile.value = _userProfile.value.copy(weight = weight)
-        updateSteps()
-    }
+    // --- Update functions ---
+    fun setGender(gender: Gender) =
+        update { it.copy(gender = gender) }
 
-    fun setAge(age: Int) {
-        _userProfile.value = _userProfile.value.copy(age = age)
-        updateSteps()
-    }
+    fun setWeight(weight: Int) =
+        update { it.copy(weight = weight) }
 
-    fun setActivity(activity: ActivityLevel) {
-        _userProfile.value = _userProfile.value.copy(activity = activity)
-        updateSteps()
-    }
+    fun setAge(age: Int) =
+        update { it.copy(age = age) }
 
-    fun setEnvironment(environment: Environment) {
-        _userProfile.value = _userProfile.value.copy(environment = environment)
-        updateSteps()
-    }
+    fun setActivity(level: ActivityLevel) =
+        update { it.copy(activity = level) }
+
+    fun setEnvironment(env: Environment) =
+        update { it.copy(environment = env) }
 
     fun setCurrentStep(step: Int) {
         _currentStep.value = step
-        updateSteps()
+    }
+
+    private fun update(block: (UserProfile) -> UserProfile) {
+        _userProfile.value = block(_userProfile.value)
     }
 }

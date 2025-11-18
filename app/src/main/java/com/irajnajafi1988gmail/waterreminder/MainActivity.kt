@@ -22,13 +22,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WaterReminderTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    SetupScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+
+                SetupScreen()
             }
         }
     }
 }
+
 
