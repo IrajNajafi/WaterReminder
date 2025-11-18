@@ -45,7 +45,7 @@ fun WeightStep(
         Text(
             text = "Please Select Your Weight.",
             fontSize = 25.sp,
-            fontWeight = FontWeight.Light,
+            fontWeight = FontWeight.Bold,
             color = Color.Gray
         )
 
