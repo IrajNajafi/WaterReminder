@@ -34,7 +34,7 @@ fun GenderStep(
         Text(
             text = "Please select your gender.",
             fontSize = 25.sp,
-            fontWeight = FontWeight.Light,
+            fontWeight = FontWeight.Bold,
             color = Color.Gray
         )
 

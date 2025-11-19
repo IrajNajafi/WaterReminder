@@ -45,7 +45,7 @@ fun WeightStep(
         Text(
             text = "Please Select Your Weight.",
             fontSize = 25.sp,
-            fontWeight = FontWeight.Light,
+            fontWeight = FontWeight.Bold,
             color = Color.Gray
         )
 
@@ -57,9 +57,9 @@ fun WeightStep(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
-                painter = painterResource(R.drawable.weight_lifting_icon),
+                painter = painterResource(R.drawable.weight2),
                 contentDescription = null,
-                modifier = Modifier.size(150.dp)
+                modifier = Modifier.size(200.dp)
             )
 
             Row(
@@ -90,7 +90,7 @@ fun WeightStep(
 
                 Text(
                     text = "Kg",
-                    fontSize = 20.sp,
+                    fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Gray
                 )
