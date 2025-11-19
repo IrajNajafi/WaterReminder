@@ -1,10 +1,26 @@
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setup.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -14,10 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.irajnajafi1988gmail.waterreminder.R
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.ActivityLevelStep
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.AgeStep
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.EnvironmentStep
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.GenderStep
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.ItemSetupPath
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.WeightStep
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ActivityLevel
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Gender
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ItemGender
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.SetupViewModel
@@ -42,6 +61,8 @@ fun SetupScreen(
         0 -> userProfile.gender != null
         1 -> (userProfile.weight ?: 0) > 0
         2 -> (userProfile.age ?: 0) > 0
+        3 -> userProfile.activity != null
+        4 -> userProfile.environment != null
         else -> true
     }
 
@@ -75,8 +96,11 @@ fun SetupScreen(
                     onSelect = { viewModel.setGender(it) },
                     modifier = Modifier.fillMaxSize()
                 )
+
                 1 -> WeightStep()
                 2 -> AgeStep()
+                3 -> ActivityLevelStep()
+                4->EnvironmentStep()
 
             }
 

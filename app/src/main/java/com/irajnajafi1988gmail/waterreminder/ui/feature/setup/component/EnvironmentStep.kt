@@ -2,17 +2,16 @@
 
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component
 
-import android.support.v4.os.IResultReceiver
-import android.widget.NumberPicker
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,43 +23,41 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieAnimationState
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.irajnajafi1988gmail.waterreminder.R
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Environment
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.SetupViewModel
 
 @Composable
-fun AgeStep(
-    viewModel: SetupViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
+fun EnvironmentStep(
+    modifier: Modifier = Modifier,
+    viewModel: SetupViewModel = hiltViewModel()
 ) {
-    val age by viewModel.userProfile.collectAsState().let { state ->
-        derivedStateOf { state.value.weight ?: 25 }
+    val selectedEnvironment by viewModel.userProfile.collectAsState().let { state ->
+        derivedStateOf { state.value.environment?: Environment.NORMAL }
+
     }
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.cake))
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.environment))
     val progress by animateLottieCompositionAsState(
         composition = composition,
         iterations = LottieConstants.IterateForever
     )
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Please Select Your Age.",
-            fontSize = 25.sp,
+            text = "Please select your living environment.",
+            fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
             color = Color.Gray
         )
-
         Spacer(modifier = Modifier.weight(1f))
 
         Row(
@@ -72,43 +69,56 @@ fun AgeStep(
                 composition = composition,
                 progress = progress,
                 modifier = Modifier.size(220.dp)
+
             )
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                AndroidView(
-                    modifier = Modifier
-                        .height(170.dp)
-                        .width(100.dp),
-                    factory = { context ->
-                        NumberPicker(context).apply {
-                            minValue = 1
-                            maxValue = 120
-                            value = age
-                            setOnValueChangedListener { _, _, newVal ->
-                                viewModel.setAge(newVal)
-                            }
-
-                        }
-                    },
-                    update = { picker ->
-                        picker.value = age
-                    }
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Text(
-                    text = "Year",
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Gray
-                )
-
-            }
-
+            EnvironmentRadioGroup(
+                selectedOption = selectedEnvironment,
+                onSelectedChange = {viewModel.setEnvironment(it)}
+            )
         }
         Spacer(modifier = Modifier.weight(1f))
+
+    }
+}
+
+@Composable
+fun EnvironmentRadioGroup(
+    selectedOption: Environment,
+    onSelectedChange: (Environment) -> Unit
+) {
+    val option = listOf(
+        Environment.FREEZING,
+        Environment.COLD,
+        Environment.NORMAL,
+        Environment.WARM,
+        Environment.HOT,
+        Environment.VERY_HOT,
+
+
+        )
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "Select Environment",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+            option.forEach { option ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                RadioButton(
+                    selected = option == selectedOption,
+                    onClick = { onSelectedChange(option) }
+                )
+                Text(
+                    option.name,
+                    modifier = Modifier.padding(start = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
     }
 }
