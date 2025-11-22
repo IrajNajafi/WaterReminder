@@ -4,14 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.screen.SetupScreen
+import com.irajnajafi1988gmail.waterreminder.navigation.AppNavigation
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.component.HomeTabContent
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.screen.ThreeTabsScreen
 import com.irajnajafi1988gmail.waterreminder.ui.theme.WaterReminderTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -23,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             WaterReminderTheme {
 
-                SetupScreen()
+                HomeTabContent()
             }
         }
     }
