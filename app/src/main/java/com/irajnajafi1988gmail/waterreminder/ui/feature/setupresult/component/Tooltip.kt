@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -13,15 +14,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun Tooltip(
     text: String,
     modifier: Modifier = Modifier,
-    backgroundColor: Color = Color(0xD5ABCFF6)
+    backgroundColor: Color =  Color(0xFF444242),
+    color: Color
 ) {
     Surface(
         color = backgroundColor,
@@ -33,11 +37,13 @@ fun Tooltip(
         modifier = modifier.padding(start = 10.dp)
     ) {
         Box(
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = text,
-                color = Color.Black
+                color =color,
+                fontSize =10.sp
             )
         }
     }

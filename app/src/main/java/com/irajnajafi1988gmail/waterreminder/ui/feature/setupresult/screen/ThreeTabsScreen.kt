@@ -1,5 +1,7 @@
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.screen
 
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Tab
@@ -22,17 +27,23 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.component.HistoryTabContent
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.component.HomeTabContent
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.component.SettingsTabContent
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.model.TableSection
+import com.irajnajafi1988gmail.waterreminder.ui.theme.DeepSkyBlue
 import com.irajnajafi1988gmail.waterreminder.ui.theme.SkyBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThreeTabsScreen() {
+fun ThreeTabsScreen(
+    navController: NavController
+) {
 
     val tabs = TableSection.entries
 
@@ -48,7 +59,7 @@ fun ThreeTabsScreen() {
             indicator = { tabPositions ->
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                   color = Color.White
+                    color = Color.White
                 )
             }
 
@@ -70,7 +81,10 @@ fun ThreeTabsScreen() {
                                 Icon(
                                     painter = painterResource(item.icon),
                                     contentDescription = item.label,
-                                    tint = Color.White
+                                    modifier = Modifier.size(25.dp),
+                                    tint = if (item.icon == TableSection.HOME.icon) DeepSkyBlue else Color.White
+
+
                                 )
                                 Spacer(modifier = Modifier.padding(6.dp))
                                 Text(
@@ -80,8 +94,6 @@ fun ThreeTabsScreen() {
                             }
                         }
                     )
-
-
                 }
 
             }
@@ -91,7 +103,7 @@ fun ThreeTabsScreen() {
         when (selectedTab) {
             0 -> HomeTabContent()
             1 -> HistoryTabContent()
-            2 -> SettingsTabContent()
+            2 -> SettingsTabContent(navController=navController)
         }
     }
 }

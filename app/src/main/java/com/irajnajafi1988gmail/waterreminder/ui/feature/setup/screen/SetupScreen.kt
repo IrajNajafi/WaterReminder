@@ -2,35 +2,13 @@
 
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setup.screen
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -40,22 +18,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
-import com.irajnajafi1988gmail.waterreminder.R
 import com.irajnajafi1988gmail.waterreminder.navigation.NavScreen
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.ActivityLevelStep
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.AgeStep
@@ -65,16 +31,12 @@ import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.ItemSetu
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.LoadingScreenWithWave
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.NavigationButtons
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.WeightStep
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ActivityLevel
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Gender
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ItemGender
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.SetupViewModel
-import com.irajnajafi1988gmail.waterreminder.ui.theme.Pink40
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.UserViewModel
 import kotlinx.coroutines.delay
 
 @Composable
 fun SetupScreen(
-    viewModel: SetupViewModel = hiltViewModel(),
+    viewModel: UserViewModel = hiltViewModel(),
     navController: NavController
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
@@ -112,10 +74,14 @@ fun SetupScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .background(color = Color.White)
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .padding(top = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ItemSetupPath(steps = stepStatuses)
+
+            ItemSetupPath(steps = stepStatuses, currentStep = currentStep)
+
+
             Spacer(modifier = Modifier.height(16.dp))
 
             when (currentStep) {
@@ -126,16 +92,32 @@ fun SetupScreen(
                     modifier = Modifier.fillMaxSize()
                 )
 
-                1 -> WeightStep()
-                2 -> AgeStep()
-                3 -> ActivityLevelStep()
-                4 -> EnvironmentStep()
+                1 -> WeightStep(
+                    weight = userProfile.weight,
+                    onWeightChange = { viewModel.setWeight(it) }
+                )
+
+                2 -> AgeStep(
+                    age = userProfile.age,
+                    onAgeChange = { viewModel.setAge(it) }
+                )
+
+                3 -> ActivityLevelStep(
+                    selectedActivity = userProfile.activity,
+                    onActivityChange = { viewModel.setActivity(it) }
+                )
+
+                4 -> EnvironmentStep(
+                    selectedEnvironment = userProfile.environment,
+                    onEnvironmentChange = {
+                        viewModel.setEnvironment(it)
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
+
+
 }
-
-
-

@@ -14,16 +14,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -31,17 +27,15 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.irajnajafi1988gmail.waterreminder.R
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Environment
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.SetupViewModel
+import com.irajnajafi1988gmail.waterreminder.ui.theme.PurpleGrey40
 
 @Composable
 fun EnvironmentStep(
-    modifier: Modifier = Modifier,
-    viewModel: SetupViewModel = hiltViewModel()
+    selectedEnvironment: Environment?,
+    onEnvironmentChange: (Environment) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    val selectedEnvironment by viewModel.userProfile.collectAsState().let { state ->
-        derivedStateOf { state.value.environment?: Environment.NORMAL }
-
-    }
+    val finalEnvironment = selectedEnvironment ?: Environment.NORMAL
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.environment))
     val progress by animateLottieCompositionAsState(
         composition = composition,
@@ -56,7 +50,7 @@ fun EnvironmentStep(
             text = "Please select your living environment.",
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray
+            color = PurpleGrey40
         )
         Spacer(modifier = Modifier.weight(1f))
 
@@ -72,8 +66,8 @@ fun EnvironmentStep(
 
             )
             EnvironmentRadioGroup(
-                selectedOption = selectedEnvironment,
-                onSelectedChange = {viewModel.setEnvironment(it)}
+                selectedOption = finalEnvironment,
+                onEnvironmentChange = { onEnvironmentChange(it) }
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -84,7 +78,7 @@ fun EnvironmentStep(
 @Composable
 fun EnvironmentRadioGroup(
     selectedOption: Environment,
-    onSelectedChange: (Environment) -> Unit
+    onEnvironmentChange: (Environment) -> Unit
 ) {
     val option = listOf(
         Environment.FREEZING,
@@ -107,11 +101,11 @@ fun EnvironmentRadioGroup(
             style = MaterialTheme.typography.titleMedium
         )
 
-            option.forEach { option ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
+        option.forEach { option ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 RadioButton(
                     selected = option == selectedOption,
-                    onClick = { onSelectedChange(option) }
+                    onClick = { onEnvironmentChange(option) }
                 )
                 Text(
                     option.name,

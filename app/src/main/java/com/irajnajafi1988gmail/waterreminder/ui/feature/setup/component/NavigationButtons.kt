@@ -1,5 +1,7 @@
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,7 +23,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.irajnajafi1988gmail.waterreminder.R
+import com.irajnajafi1988gmail.waterreminder.ui.theme.BrightOrange
+import com.irajnajafi1988gmail.waterreminder.ui.theme.DeepSkyBlue
 import com.irajnajafi1988gmail.waterreminder.ui.theme.Pink40
+import com.irajnajafi1988gmail.waterreminder.ui.theme.PurpleGrey40
 
 @Composable
 fun NavigationButtons(
@@ -43,7 +48,7 @@ fun NavigationButtons(
             shape = CircleShape,
             modifier = Modifier.size(50.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Pink40,
+                containerColor = PurpleGrey40,
                 contentColor = Color.White
             ),
             contentPadding = PaddingValues(0.dp)
@@ -60,7 +65,7 @@ fun NavigationButtons(
             enabled = isNextEnabled,
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Pink40,
+                containerColor = PurpleGrey40,
                 contentColor = Color.White
             ),
         ) {

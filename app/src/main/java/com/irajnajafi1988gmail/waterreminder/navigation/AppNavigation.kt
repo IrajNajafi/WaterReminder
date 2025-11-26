@@ -22,7 +22,7 @@ fun AppNavigation() {
         }
 
         composable(route = NavScreen.ResultScreen.route) {
-            ThreeTabsScreen()
+            ThreeTabsScreen(navController)
         }
 
     }

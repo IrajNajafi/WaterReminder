@@ -1,40 +1,40 @@
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.irajnajafi1988gmail.waterreminder.R
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ActivityLevel
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Environment
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Gender
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ItemGender
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.StepStatus
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.UserProfile
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.*
+import com.irajnajafi1988gmail.waterreminder.domain.model.UserProfile
+import com.irajnajafi1988gmail.waterreminder.domain.usecase.GetUserUseCase
+import com.irajnajafi1988gmail.waterreminder.domain.usecase.IsProfileCompleteUseCase
+import com.irajnajafi1988gmail.waterreminder.domain.usecase.SaveUserUseCase
 import com.irajnajafi1988gmail.waterreminder.ui.theme.SkyBlue
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+private const val TAG = "UserViewModel"
+
 @HiltViewModel
-class SetupViewModel @Inject constructor() : ViewModel() {
+class UserViewModel @Inject constructor(
+    private val getUserUseCase: GetUserUseCase,
+    private val saveUserUseCase: SaveUserUseCase,
+    private val isProfileCompleteUseCase: IsProfileCompleteUseCase
+) : ViewModel() {
 
-    // --- User Profile ---
     private val _userProfile = MutableStateFlow(UserProfile())
-    val userProfile = _userProfile.asStateFlow()
+    val userProfile: StateFlow<UserProfile> = _userProfile.asStateFlow()
 
-    // --- Current Step ---
     private val _currentStep = MutableStateFlow(0)
-    val currentStep = _currentStep.asStateFlow()
+    val currentStep: StateFlow<Int> = _currentStep.asStateFlow()
 
-    // --- Step Statuses ---
     val stepStatuses: StateFlow<List<StepStatus>> =
         combine(_userProfile, _currentStep) { profile, _ ->
             listOf(
                 StepStatus(
-                    icon = when(profile.gender) {
+                    icon = when (profile.gender) {
                         Gender.MALE -> R.drawable.male
                         Gender.FEMALE -> R.drawable.female
                         else -> R.drawable.venus_mars_icon
@@ -70,16 +70,14 @@ class SetupViewModel @Inject constructor() : ViewModel() {
             )
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // --- Gender Items ---
     val genderItems = listOf(
         ItemGender(R.drawable.man_male, Gender.MALE.name, Gender.MALE),
         ItemGender(R.drawable.woman_female, Gender.FEMALE.name, Gender.FEMALE)
     )
 
-    // --- Next Enabled ---
     val isNextEnabled: StateFlow<Boolean> =
         combine(_userProfile, _currentStep) { profile, step ->
-            when(step) {
+            when (step) {
                 0 -> profile.gender != null
                 1 -> (profile.weight ?: 0) > 0
                 2 -> (profile.age ?: 0) > 0
@@ -89,15 +87,37 @@ class SetupViewModel @Inject constructor() : ViewModel() {
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    // --- Update functions ---
-    fun setGender(gender: Gender) = update { it.copy(gender = gender) }
-    fun setWeight(weight: Int) = update { it.copy(weight = weight) }
-    fun setAge(age: Int) = update { it.copy(age = age) }
-    fun setActivity(level: ActivityLevel) = update { it.copy(activity = level) }
-    fun setEnvironment(env: Environment) = update { it.copy(environment = env) }
+    val isProfileComplete: StateFlow<Boolean> =
+        isProfileCompleteUseCase().stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    init {
+        viewModelScope.launch {
+            getUserUseCase().collectLatest { profile ->
+                _userProfile.value = profile
+            }
+        }
+    }
+
+    private fun updateProfile(block: (UserProfile) -> UserProfile) {
+        val updatedProfile = block(_userProfile.value)
+        _userProfile.value = updatedProfile
+        viewModelScope.launch {
+            saveUserUseCase(updatedProfile)
+        }
+    }
+
+    fun setGender(gender: Gender) = updateProfile { it.copy(gender = gender) }
+    fun setWeight(weight: Int) = updateProfile { it.copy(weight = weight) }
+    fun setAge(age: Int) = updateProfile { it.copy(age = age) }
+    fun setActivity(level: ActivityLevel) = updateProfile { it.copy(activity = level) }
+    fun setEnvironment(env: Environment) = updateProfile { it.copy(environment = env) }
     fun setCurrentStep(step: Int) { _currentStep.value = step }
 
-    private fun update(block: (UserProfile) -> UserProfile) {
-        _userProfile.value = block(_userProfile.value)
+    fun resetUserProfile() {
+        viewModelScope.launch {
+            saveUserUseCase(UserProfile())
+            _userProfile.value = UserProfile()
+            _currentStep.value = 0
+        }
     }
 }
