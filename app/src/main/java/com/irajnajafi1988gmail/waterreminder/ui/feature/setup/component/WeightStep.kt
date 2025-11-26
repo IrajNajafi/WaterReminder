@@ -26,16 +26,17 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.irajnajafi1988gmail.waterreminder.R
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.SetupViewModel
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.UserViewModel
+import com.irajnajafi1988gmail.waterreminder.ui.theme.PurpleGrey40
 
 @Composable
 fun WeightStep(
-    viewModel: SetupViewModel= hiltViewModel(),
+    weight: Int?,
+    onWeightChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val weight by viewModel.userProfile.collectAsState().let { state ->
-        derivedStateOf { state.value.weight ?: 50 }
-    }
+    val finalWeight = weight ?: 50
+
 
     Column(
         modifier.fillMaxSize(),
@@ -46,7 +47,7 @@ fun WeightStep(
             text = "Please Select Your Weight.",
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray
+            color = PurpleGrey40
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -74,15 +75,15 @@ fun WeightStep(
                         NumberPicker(context).apply {
                             minValue = 1
                             maxValue = 400
-                            value = weight
+                            value = finalWeight
 
                             setOnValueChangedListener { _, _, newVal ->
-                                viewModel.setWeight(newVal)
+                                onWeightChange(newVal)
                             }
                         }
                     },
                     update = { picker ->
-                        picker.value = weight
+                        picker.value = finalWeight
                     }
                 )
 

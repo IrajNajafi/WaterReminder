@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Gender
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ItemGender
 import androidx.compose.ui.text.font.FontWeight
+import com.irajnajafi1988gmail.waterreminder.ui.theme.PurpleGrey40
 
 @Composable
 fun GenderStep(
@@ -35,7 +36,7 @@ fun GenderStep(
             text = "Please select your gender.",
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray
+            color = PurpleGrey40
         )
 
         Spacer(modifier = Modifier.weight(1f))

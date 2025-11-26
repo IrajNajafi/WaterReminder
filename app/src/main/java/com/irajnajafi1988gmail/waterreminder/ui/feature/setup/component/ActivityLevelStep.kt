@@ -31,16 +31,17 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.irajnajafi1988gmail.waterreminder.R
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.ActivityLevel
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.SetupViewModel
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.UserViewModel
+import com.irajnajafi1988gmail.waterreminder.ui.theme.PurpleGrey40
 
 @Composable
 fun ActivityLevelStep(
+    selectedActivity: ActivityLevel?,
+    onActivityChange: (ActivityLevel) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SetupViewModel = hiltViewModel()
 ) {
-    val selectedActivity by viewModel.userProfile.collectAsState().let { state ->
-        derivedStateOf { state.value.activity ?: ActivityLevel.LOW }
-    }
+   val finalActivity = selectedActivity?: ActivityLevel.LOW
+
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.activity))
     val progress by animateLottieCompositionAsState(
         composition = composition,
@@ -56,7 +57,7 @@ fun ActivityLevelStep(
             text = "Please Select Your Activity Level.",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Gray
+            color = PurpleGrey40
         )
         Spacer(modifier = Modifier.weight(1f))
         Row(
@@ -71,8 +72,8 @@ fun ActivityLevelStep(
 
             )
             LevelRadioGroup(
-                selectedOption = selectedActivity,
-                onSelectedChange = { viewModel.setActivity(it) }
+                selectedOption = finalActivity,
+                onSelectedChange = { onActivityChange(it) }
             )
         }
         Spacer(modifier = Modifier.weight(1f))
