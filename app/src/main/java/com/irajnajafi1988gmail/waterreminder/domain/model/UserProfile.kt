@@ -5,9 +5,11 @@ import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Environment
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.model.Gender
 
 data class UserProfile(
-    val gender: Gender? = null,
-    val weight: Int? = null,
-    val age: Int? = null,
-    val activity: ActivityLevel? = null,
-    val environment: Environment? = null
+    val gender: Gender? = Gender.MALE,
+    val weight: Int =0,
+    val age: Int = 0,
+    val activity: ActivityLevel? = ActivityLevel.MEDIUM,
+    val environment: Environment? = Environment.NORMAL,
+    val dailyWaterDrunk: Int = 0, // مقدار آب خورده
+    val isProfileComplete: Boolean = false // آیا پروفایل کامل شده؟
 )

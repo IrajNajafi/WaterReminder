@@ -5,9 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.irajnajafi1988gmail.waterreminder.navigation.AppNavigation
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.component.HistoryTabContent
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.component.HomeTabContent
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.screen.ThreeTabsScreen
 import com.irajnajafi1988gmail.waterreminder.ui.theme.WaterReminderTheme
 import dagger.hilt.android.AndroidEntryPoint
 

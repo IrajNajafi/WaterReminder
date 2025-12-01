@@ -31,9 +31,9 @@ import com.irajnajafi1988gmail.waterreminder.ui.theme.PurpleGrey40
 @Composable
 fun NavigationButtons(
     currentStep: Int,
+    isNextEnabled: Boolean,
     onNext: () -> Unit,
-    onBack: () -> Unit,
-    isNextEnabled: Boolean
+    onBack: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -42,6 +42,7 @@ fun NavigationButtons(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Back Button
         Button(
             onClick = onBack,
             enabled = currentStep > 0,
@@ -60,6 +61,7 @@ fun NavigationButtons(
             )
         }
 
+        // Next / Finish Button
         Button(
             onClick = onNext,
             enabled = isNextEnabled,
@@ -77,4 +79,3 @@ fun NavigationButtons(
         }
     }
 }
-

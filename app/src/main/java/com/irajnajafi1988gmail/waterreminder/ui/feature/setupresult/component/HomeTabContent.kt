@@ -1,86 +1,57 @@
-@file:Suppress("DEPRECATION")
-
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.component
 
-import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
+import androidx.navigation.NavController
+import com.airbnb.lottie.compose.*
 import com.irajnajafi1988gmail.waterreminder.R
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.UserViewModel
+import com.irajnajafi1988gmail.waterreminder.navigation.NavScreen
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.model.ItemDishes
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.utils.WaterCalculatorDynamic
-import com.irajnajafi1988gmail.waterreminder.ui.theme.DeepSkyBlue
-import kotlinx.coroutines.delay
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setupresult.viewModel.HomeViewModel
 
-// ---------------------------
-// 🔥 HOME SCREEN نهایی
-// ---------------------------
 @Composable
-fun HomeTabContent(
-    userViewModel: UserViewModel = hiltViewModel()
+fun  HomeTabContent(
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    navController: NavController
 ) {
-    var selectedIcon by remember { mutableStateOf<Int?>(R.drawable.glass175) }
-    var selectedVolume by remember { mutableStateOf(175) }
-    var selectedVolumeLabel by remember { mutableStateOf("$selectedVolume ml") }
-    var drunkWater by remember { mutableStateOf(0) }
-    var showDishes by remember { mutableStateOf(false) }
+    // 🌊 States از ویومدل
+    val drunkWater by homeViewModel.dailyWaterDrunk.collectAsState()
+    val dailyWaterGoal by homeViewModel.dailyWaterGoal.collectAsState()
+    val selectedDish by homeViewModel.selectedDish.collectAsState()
+    val showDishes by homeViewModel.showDishes.collectAsState()
+    val showAlarm by homeViewModel.showAlarm.collectAsState()
+    val alarmEnabled by homeViewModel.alarmEnabled.collectAsState()
 
-    val userProfile by userViewModel.userProfile.collectAsState()
-    val dailyWaterMl = remember(userProfile) {
-        WaterCalculatorDynamic.calculateDailyNeedMl(userProfile)
-    }
+    val selectedIcon = selectedDish.icon
+    val selectedVolume = selectedDish.volumeMl ?: 0
+    val selectedLabel = selectedDish.label
 
-    // Lottie Animation
+    // 🎬 Lottie animation آلارم
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.time))
     var playAnimation by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            playAnimation = true
-            delay(4000)
-            playAnimation = false
-            delay(100)
+    LaunchedEffect(composition, alarmEnabled) {
+        if (alarmEnabled && composition != null) {
+            while (true) {
+                playAnimation = true
+                kotlinx.coroutines.delay(4000)
+                playAnimation = false
+                kotlinx.coroutines.delay(100)
+            }
         }
     }
 
@@ -94,14 +65,16 @@ fun HomeTabContent(
         floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier.padding(bottom = 20.dp),
-                onClick = {},
+                onClick = { homeViewModel.toggleAlarm() },
                 containerColor = Color.White
             ) {
-                LottieAnimation(
-                    composition = composition,
-                    progress = { progress },
-                    modifier = Modifier.size(70.dp)
-                )
+                composition?.let {
+                    LottieAnimation(
+                        composition = it,
+                        progress = { progress },
+                        modifier = Modifier.size(70.dp)
+                    )
+                }
             }
         }
     ) { paddingValues ->
@@ -109,11 +82,11 @@ fun HomeTabContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White)
                 .padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            // 💧 Drop Image + Tooltip
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center,
@@ -124,210 +97,112 @@ fun HomeTabContent(
                     contentDescription = null,
                     modifier = Modifier.size(50.dp)
                 )
+
                 Tooltip(
                     text = when {
                         drunkWater == 0 -> "Start drinking your first glass of water"
-                        drunkWater in 1 until (dailyWaterMl * 0.95).toInt() ->
-                            "Keep going, your daily goal is ${dailyWaterMl}ml"
-                        drunkWater in (dailyWaterMl * 0.95).toInt()..(dailyWaterMl * 1.05).toInt() ->
-                            "You reached your daily water goal!"
-                        drunkWater > (dailyWaterMl * 1.05).toInt() ->
-                            "You exceeded your daily water goal by ${drunkWater - dailyWaterMl}ml!"
-                        else -> ""
+                        drunkWater < (dailyWaterGoal * 0.95).toInt() -> "Keep going, your daily goal is ${dailyWaterGoal} ml"
+                        drunkWater <= (dailyWaterGoal * 1.05).toInt() -> "You reached your daily water goal!"
+                        else -> "You exceeded your daily water goal by ${drunkWater - dailyWaterGoal} ml!"
                     },
-                    color = when{
-                        drunkWater == 0 -> Color(0xFF00A5FF)
-                        drunkWater in 1 until (dailyWaterMl * 0.95).toInt() -> Color(0xFF00A5FF)
-                        drunkWater in (dailyWaterMl * 0.95).toInt()..(dailyWaterMl * 1.05).toInt() -> Color(0xFF4CAF50)
-                        drunkWater > (dailyWaterMl * 1.05).toInt() -> Color(0xFFDCE775)
-
-                        else -> Color(0xFF00A5FF)
+                    color = when {
+                        drunkWater < (dailyWaterGoal * 0.95).toInt() -> Color(0xFF00A5FF)
+                        drunkWater <= (dailyWaterGoal * 1.05).toInt() -> Color(0xFF4CAF50)
+                        else -> Color(0xFFDCE775)
                     }
                 )
             }
 
             Spacer(Modifier.height(20.dp))
 
+            // 🥤 SemiCircle + متن شمارش
+            val cupsText = if (selectedVolume > 0) {
+                "${drunkWater / selectedVolume} cups / ${dailyWaterGoal / selectedVolume} cups"
+            } else {
+                "0 cups / -"
+            }
+
             SemiCircleWithIconsAndCenterCircle(
-                number = "$drunkWater / $dailyWaterMl ml",
-                text = "${drunkWater / selectedVolume} / ${dailyWaterMl / selectedVolume} ",
+                number = "$drunkWater / $dailyWaterGoal ml",
+                text = cupsText,
                 selectedIcon = selectedIcon,
-                numberMl = selectedVolumeLabel,
+                numberMl = selectedLabel,
                 drunkWater = drunkWater,
-                dailyWaterMl = dailyWaterMl,
+                dailyWaterMl = dailyWaterGoal,
                 onClick = {
-                    drunkWater += selectedVolume
-                    if (drunkWater > dailyWaterMl) {
-                        Log.d("HomeTabContent", "You drank more than daily goal!")
+                    if (selectedVolume > 0) {
+                        val newAmount = drunkWater + selectedVolume
+                        homeViewModel.saveDailyWater(newAmount)
                     }
                 }
             )
 
-            WaterActionRow(
-                onShowDishes = { showDishes = !showDishes },
-                selectedIcon = selectedIcon,
-                label = "$selectedVolume",
+            Spacer(Modifier.height(20.dp))
 
+            // 💧 Water Action Row
+            WaterActionRow(
+                onShowDishes = { homeViewModel.toggleDishes() },
+                selectedIcon = selectedIcon,
+                label = selectedLabel
             )
 
-            // Overlay تاریک وقتی Dishes باز است
-            AnimatedVisibility(
-                visible = showDishes,
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clickable { showDishes = false }
-                )
+            Spacer(Modifier.height(20.dp))
+
+            // 🔄 دکمه ریست کامل
+            Button(onClick = { homeViewModel.resetAll() }) {
+                Text("Reset All")
             }
         }
 
-        // Dishes Box
+        // 🍽️ Overlay انتخاب لیوان
         if (showDishes) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color.Black.copy(alpha = 0.4f))
-                    .clickable { showDishes = false },
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { homeViewModel.toggleDishes() },
                 contentAlignment = Alignment.Center
             ) {
                 DishesBox(
-                    onSelected = { iconId, volume, label ->
-                        selectedIcon = iconId
-                        selectedVolume = volume ?: 0
-                        selectedVolumeLabel = label
-                        showDishes = false
+                    itemDishes = homeViewModel.itemDishes,
+                    onSelected = { icon, volumeMl, label ->
+                        homeViewModel.selectDish(
+                            ItemDishes(icon, label, volumeMl)
+                        )
+                        homeViewModel.toggleDishes()
                     }
                 )
             }
         }
-    }
-}
 
-// ---------------------------
-// Dishes Box
-// ---------------------------
-@Composable
-fun DishesBox(
-    modifier: Modifier = Modifier,
-    onSelected: (icon: Int, volumeMl: Int?, label: String) -> Unit
-) {
-    val itemDishes = listOf(
-        ItemDishes(R.drawable.cup100, "100 ml", 100),
-        ItemDishes(R.drawable.cup125, "125 ml", 125),
-        ItemDishes(R.drawable.glass175, "175 ml", 175),
-        ItemDishes(R.drawable.mug200, "200 ml", 200),
-        ItemDishes(R.drawable.thermos1000, "1000 ml", 1000),
-        ItemDishes(R.drawable.cup_custom, "Custom", null)
-    )
-
-    Card(
-        modifier = modifier.width(350.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            itemDishes.chunked(3).forEach { rowItems ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    rowItems.forEach { item ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                painter = painterResource(item.icon),
-                                contentDescription = item.label,
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clickable {
-                                        onSelected(item.icon, item.volumeMl, item.label)
-                                        Log.d(
-                                            "DishesBox",
-                                            "Icon clicked: ${item.label}, Volume: ${item.volumeMl}"
-                                        )
-                                    }
-                            )
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(item.label, fontSize = 12.sp)
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
+        // ⏰ Overlay آلارم
+        if (showAlarm) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { homeViewModel.toggleAlarm() },
+                contentAlignment = Alignment.Center
+            ) {
+                ItemAlarm(
+                    onManualClick = { navController.navigate(NavScreen.ManualSettings.route) },
+                    onAutomaticClick = { navController.navigate(NavScreen.AutomaticSettings.route) }
+                )
             }
         }
     }
-}
 
-
-
-// ---------------------------
-// Water Action Row
-// ---------------------------
-@Composable
-fun WaterActionRow(
-    onShowDishes: () -> Unit,
-    selectedIcon: Int?,
-    label: String,
-
-    ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(modifier = Modifier.weight(1f)) // ستون خالی سمت چپ
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.arrowup),
-                contentDescription = null,
-                modifier = Modifier
-                    .rotate(-90f)
-                    .size(20.dp),
-                tint = DeepSkyBlue
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Confirm that you have just drunk water",
-                fontSize = 10.sp
-            )
-        }
-
-        Column(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(R.drawable.refresh),
-                contentDescription = "Show Dishes",
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { onShowDishes() }
-            )
-            Spacer(modifier = Modifier.height(5.dp))
-            selectedIcon?.let {
-                Icon(
-                    painter = painterResource(it),
-                    contentDescription = null,
-                    modifier = Modifier.size(30.dp)
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "$label ml ",  // ← نمایش ml و label زیر آیکون
-                    fontSize = 10.sp
-                )
-            }
+    // ♻️ اطمینان از بسته شدن Overlayها بعد از ریست
+    LaunchedEffect(drunkWater) {
+        if (drunkWater == 0) {
+            if (showDishes) homeViewModel.toggleDishes()
+            if (showAlarm) homeViewModel.toggleAlarm()
         }
     }
 }

@@ -3,6 +3,7 @@
 package com.irajnajafi1988gmail.waterreminder.ui.feature.setup.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,9 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,13 +29,15 @@ import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.ItemSetu
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.LoadingScreenWithWave
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.NavigationButtons
 import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.component.WeightStep
-import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.UserViewModel
+import com.irajnajafi1988gmail.waterreminder.ui.feature.setup.viewmodel.SetupViewModel
 import kotlinx.coroutines.delay
+
 
 @Composable
 fun SetupScreen(
-    viewModel: UserViewModel = hiltViewModel(),
-    navController: NavController
+    viewModel: SetupViewModel = hiltViewModel(),
+    navController: NavController,
+    onComplete: () -> Unit
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
     val currentStep by viewModel.currentStep.collectAsState()
@@ -45,44 +45,38 @@ fun SetupScreen(
     val genderItems = viewModel.genderItems
     val isNextEnabled by viewModel.isNextEnabled.collectAsState()
 
-    var showLoading by remember { mutableStateOf(false) }
-    if (showLoading) {
-        LoadingScreenWithWave()
-        LaunchedEffect(showLoading) {
-            delay(2000)
-            navController.navigate(NavScreen.ResultScreen.route) {
-                popUpTo(NavScreen.SetupScreen.route) { inclusive = true }
-            }
-        }
-        return
-    }
-
     Scaffold(
         bottomBar = {
-            NavigationButtons(
-                currentStep = currentStep,
-                onNext = {
-                    if (currentStep < 4) viewModel.setCurrentStep(currentStep + 1)
-                    else showLoading = true
-                },
-                onBack = { if (currentStep > 0) viewModel.setCurrentStep(currentStep - 1) },
-                isNextEnabled = isNextEnabled
-            )
+            if (currentStep < 5) {
+                NavigationButtons(
+                    currentStep = currentStep,
+                    isNextEnabled = isNextEnabled,
+                    onBack = { if (currentStep > 0) viewModel.setCurrentStep(currentStep - 1) },
+                    onNext = {
+                        val isLastStep = currentStep == 4
+                        if (isLastStep) {
+                            // ذخیره پروفایل و رفتن به صفحه بعد
+                            onComplete()
+                        } else {
+                            viewModel.setCurrentStep(currentStep + 1)
+                        }
+                    }
+                )
+            }
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(color = Color.White)
+                .background(Color.White)
                 .padding(paddingValues)
                 .padding(top = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-
-            ItemSetupPath(steps = stepStatuses, currentStep = currentStep)
-
-
-            Spacer(modifier = Modifier.height(16.dp))
+            if (currentStep < 5) {
+                ItemSetupPath(steps = stepStatuses, currentStep = currentStep)
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             when (currentStep) {
                 0 -> GenderStep(
@@ -91,33 +85,25 @@ fun SetupScreen(
                     onSelect = { viewModel.setGender(it) },
                     modifier = Modifier.fillMaxSize()
                 )
-
                 1 -> WeightStep(
                     weight = userProfile.weight,
                     onWeightChange = { viewModel.setWeight(it) }
                 )
-
                 2 -> AgeStep(
                     age = userProfile.age,
                     onAgeChange = { viewModel.setAge(it) }
                 )
-
                 3 -> ActivityLevelStep(
                     selectedActivity = userProfile.activity,
                     onActivityChange = { viewModel.setActivity(it) }
                 )
-
                 4 -> EnvironmentStep(
                     selectedEnvironment = userProfile.environment,
-                    onEnvironmentChange = {
-                        viewModel.setEnvironment(it)
-                    }
+                    onEnvironmentChange = { viewModel.setEnvironment(it) }
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            if (currentStep < 5) Spacer(modifier = Modifier.height(24.dp))
         }
     }
-
-
 }

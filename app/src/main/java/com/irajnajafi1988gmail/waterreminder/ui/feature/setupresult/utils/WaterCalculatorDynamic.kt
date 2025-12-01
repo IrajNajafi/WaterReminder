@@ -20,7 +20,9 @@ object WaterCalculatorDynamic {
         base *= when (user.gender) {
             Gender.MALE -> 1.1f
             Gender.FEMALE -> 1.0f
+
             null -> 1.0f
+
         }
 
         // 3. اصلاح سن
@@ -44,6 +46,7 @@ object WaterCalculatorDynamic {
 
         // 5. محیط زندگی و دما (میلی‌لیتر اضافه)
         val envAdded = when (user.environment) {
+
             Environment.FREEZING -> 100f
             Environment.COLD -> 0f
             Environment.NORMAL -> 200f
